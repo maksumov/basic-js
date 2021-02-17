@@ -1,5 +1,3 @@
-const CustomError = require('../extensions/custom-error');
-
 /**
  * Your task is to count the cats hidden in the backyard
  * (presented by two-dimensional Array). Cats hide well,
