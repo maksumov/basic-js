@@ -26,7 +26,7 @@ const isValidInput = (str) =>
 const sanitizeInput = (str) => +str.trim();
 
 const calculateAge = (activity) =>
-  Math.log(MODERN_ACTIVITY / activity) / (0.693 / HALF_LIFE_PERIOD);
+  Math.ceil(Math.log(MODERN_ACTIVITY / activity) / (0.693 / HALF_LIFE_PERIOD));
 
 /**
  * Calculates sample approximate age (in years)
