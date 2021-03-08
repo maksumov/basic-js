@@ -42,64 +42,68 @@ const validate = (arr) => {
 const reducer = (transformed, elem) => {
   switch (elem) {
     case DISCARD_NEXT:
-      return { arr: transformed.arr, action: DISCARD_NEXT };
+      return {
+        arr: transformed.arr,
+        action: DISCARD_NEXT,
+        nextDiscarded: true,
+      };
 
     case DISCARD_PREV:
       return transformed.arr.length
-        ? {
-            arr: transformed.arr.slice(0, transformed.arr.length - 1),
-            action: '',
-          }
-        : { arr: [], action: '' };
+        ? transformed.nextDiscarded
+          ? {
+              arr: transformed.arr,
+              action: '',
+              nextDiscarded: false,
+            }
+          : {
+              arr: transformed.arr.slice(0, transformed.arr.length - 1),
+              action: '',
+              nextDiscarded: false,
+            }
+        : { arr: [], action: '', nextDiscarded: transformed.nextDiscarded };
 
     case DOUBLE_NEXT:
-      return { arr: transformed.arr, action: DOUBLE_NEXT };
+      return {
+        arr: transformed.arr,
+        action: DOUBLE_NEXT,
+        nextDiscarded: false,
+      };
 
     case DOUBLE_PREV:
       return transformed.arr.length
-        ? {
-            arr: [
-              ...transformed.arr,
-              transformed.arr[transformed.arr.length - 1],
-            ],
-            action: '',
-          }
-        : { arr: [], action: '' };
+        ? transformed.nextDiscarded
+          ? {
+              arr: transformed.arr,
+              action: '',
+              nextDiscarded: false,
+            }
+          : {
+              arr: [
+                ...transformed.arr,
+                transformed.arr[transformed.arr.length - 1],
+              ],
+              action: '',
+              nextDiscarded: false,
+            }
+        : { arr: [], action: '', nextDiscarded: false };
 
     default:
       return transformed.action === DISCARD_NEXT
-        ? { arr: transformed.arr, action: '' }
+        ? { arr: transformed.arr, action: '', nextDiscarded: true }
         : transformed.action === DOUBLE_NEXT
-        ? { arr: [...transformed.arr, elem, elem], action: '' }
-        : { arr: [...transformed.arr, elem], action: '' };
+        ? {
+            arr: [...transformed.arr, elem, elem],
+            action: '',
+            nextDiscarded: false,
+          }
+        : { arr: [...transformed.arr, elem], action: '', nextDiscarded: false };
   }
 };
 
-const doTransformation = (arr) => arr.reduce(reducer, { arr: [], action: '' });
+const doTransformation = (arr) =>
+  arr.reduce(reducer, { arr: [], action: '', nextDiscarded: false });
 
 const transform = (arr) => doTransformation(validate(arr)).arr;
 
 module.exports = transform;
-
-console.log(
-  transform([1, 2, 3, '--discard-next', 1337, '--discard-prev', 4, 5]),
-  [1, 2, 3, 4, 5]
-);
-
-console.log(
-  transform([
-    '--discard-prev',
-    333,
-    '--discard-next',
-    333,
-    '--discard-prev',
-    1.233,
-    '--discard-prev',
-    22,
-    3.14,
-    'ABC',
-    22,
-    '--double-next',
-  ]),
-  [333, 22, 3.14, 'ABC', 22]
-);
